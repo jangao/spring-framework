@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,11 +221,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
-						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.");
+						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.", ex);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
-						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
+						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.", ex);
 			}
 		}
 		this.initialized = true;
@@ -401,13 +401,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		// Check if we have a cached item matching the conditions
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
-		// Collect puts from any @Cacheable miss, if no cached item is found
-		List<CachePutRequest> cachePutRequests = new ArrayList<>();
-		if (cacheHit == null) {
-			collectPutRequests(contexts.get(CacheableOperation.class),
-					CacheOperationExpressionEvaluator.NO_RESULT, cachePutRequests);
-		}
-
 		Object cacheValue;
 		Object returnValue;
 
@@ -420,6 +413,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
 			cacheValue = unwrapReturnValue(returnValue);
+		}
+
+		// Collect puts from any @Cacheable miss, if no cached item is found
+		List<CachePutRequest> cachePutRequests = new ArrayList<>();
+		if (cacheHit == null) {
+			collectPutRequests(contexts.get(CacheableOperation.class), cacheValue, cachePutRequests);
 		}
 
 		// Collect any explicit @CachePuts
@@ -558,7 +557,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			@Nullable Object result, Collection<CachePutRequest> putRequests) {
 
 		for (CacheOperationContext context : contexts) {
-			if (isConditionPassing(context, result)) {
+			if (isConditionPassing(context, result) && context.canPutToCache(result)) {
 				Object key = generateKey(context, result);
 				putRequests.add(new CachePutRequest(context, key));
 			}
@@ -772,11 +771,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		protected boolean canPutToCache(@Nullable Object value) {
 			String unless = "";
-			if (this.metadata.operation instanceof CacheableOperation) {
-				unless = ((CacheableOperation) this.metadata.operation).getUnless();
+			if (this.metadata.operation instanceof CacheableOperation cacheableOperation) {
+				unless = cacheableOperation.getUnless();
 			}
-			else if (this.metadata.operation instanceof CachePutOperation) {
-				unless = ((CachePutOperation) this.metadata.operation).getUnless();
+			else if (this.metadata.operation instanceof CachePutOperation cachePutOperation) {
+				unless = cachePutOperation.getUnless();
 			}
 			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);
@@ -832,10 +831,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		public void apply(@Nullable Object result) {
-			if (this.context.canPutToCache(result)) {
-				for (Cache cache : this.context.getCaches()) {
-					doPut(cache, this.key, result);
-				}
+			for (Cache cache : this.context.getCaches()) {
+				doPut(cache, this.key, result);
 			}
 		}
 	}
@@ -857,10 +854,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof CacheOperationCacheKey)) {
+			if (!(other instanceof CacheOperationCacheKey otherKey)) {
 				return false;
 			}
-			CacheOperationCacheKey otherKey = (CacheOperationCacheKey) other;
 			return (this.cacheOperation.equals(otherKey.cacheOperation) &&
 					this.methodCacheKey.equals(otherKey.methodCacheKey));
 		}

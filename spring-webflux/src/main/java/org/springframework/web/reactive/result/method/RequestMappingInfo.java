@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -343,10 +343,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestMappingInfo)) {
+		if (!(other instanceof RequestMappingInfo otherInfo)) {
 			return false;
 		}
-		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
 		return (this.patternsCondition.equals(otherInfo.patternsCondition) &&
 				this.methodsCondition.equals(otherInfo.methodsCondition) &&
 				this.paramsCondition.equals(otherInfo.paramsCondition) &&
@@ -380,7 +379,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 		if (!this.patternsCondition.isEmpty()) {
 			Set<PathPattern> patterns = this.patternsCondition.getPatterns();
-			builder.append(" ").append(patterns.size() == 1 ? patterns.iterator().next() : patterns);
+			builder.append(' ').append(patterns.size() == 1 ? patterns.iterator().next() : patterns);
 		}
 		if (!this.paramsCondition.isEmpty()) {
 			builder.append(", params ").append(this.paramsCondition);
@@ -602,11 +601,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				return Collections.emptyList();
 			}
 			List<PathPattern> result = new ArrayList<>(patterns.length);
-			for (String path : patterns) {
-				if (StringUtils.hasText(path) && !path.startsWith("/")) {
-					path = "/" + path;
-				}
-				result.add(parser.parse(path));
+			for (String pattern : patterns) {
+				pattern = parser.initFullPathPattern(pattern);
+				result.add(parser.parse(pattern));
 			}
 			return result;
 		}

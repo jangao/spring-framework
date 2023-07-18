@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -63,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Kazuki Shimizu
  */
 class DateTimeFormattingTests {
 
@@ -104,7 +106,16 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", "10/31/09");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
+	}
+
+	@Test
+	void testBindLocalDateWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", "2009-10-31");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
 	}
 
@@ -116,7 +127,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", "October 31, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("October 31, 2009");
 	}
 
@@ -128,7 +139,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", "20091031");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("20091031");
 	}
 
@@ -137,7 +148,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", new String[] {"10/31/09"});
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 	}
 
 	@Test
@@ -145,7 +156,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct 31, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("styleLocalDate")).isEqualTo("Oct 31, 2009");
 	}
 
@@ -163,7 +174,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].styleLocalDate", "Oct 31, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("children[0].styleLocalDate")).isEqualTo("Oct 31, 2009");
 	}
 
@@ -173,7 +184,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct 31, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("styleLocalDate")).isEqualTo("Oct 31, 2009");
 	}
 
@@ -192,7 +203,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", new GregorianCalendar(2009, 9, 31, 0, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
 	}
 
@@ -201,7 +212,16 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "12:00 PM");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
+	}
+
+	@Test
+	void testBindLocalTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", "12:00:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
 	}
 
@@ -213,7 +233,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "12:00:00 PM");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00:00 PM");
 	}
 
@@ -225,7 +245,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "130000");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("130000");
 	}
 
@@ -234,7 +254,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalTime", "12:00:00 PM");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("styleLocalTime")).isEqualTo("12:00:00 PM");
 	}
 
@@ -243,7 +263,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", new GregorianCalendar(1970, 0, 0, 12, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
 	}
 
@@ -252,10 +272,23 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value.startsWith("10/31/09")).isTrue();
-		assertThat(value.endsWith("12:00 PM")).isTrue();
+		assertThat(value)
+				.startsWith("10/31/09")
+				.endsWith("12:00 PM");
+	}
+
+	@Test
+	void testBindLocalDateTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTime", "2009-10-31T12:00:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
+		assertThat(value)
+				.startsWith("10/31/09")
+				.endsWith("12:00 PM");
 	}
 
 	@Test
@@ -263,10 +296,11 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("styleLocalDateTime").toString();
-		assertThat(value.startsWith("Oct 31, 2009")).isTrue();
-		assertThat(value.endsWith("12:00:00 PM")).isTrue();
+		assertThat(value)
+				.startsWith("Oct 31, 2009")
+				.endsWith("12:00:00 PM");
 	}
 
 	@Test
@@ -274,10 +308,11 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", new GregorianCalendar(2009, 9, 31, 12, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value.startsWith("10/31/09")).isTrue();
-		assertThat(value.endsWith("12:00 PM")).isTrue();
+		assertThat(value)
+				.startsWith("10/31/09")
+				.endsWith("12:00 PM");
 	}
 
 	@Test
@@ -288,10 +323,11 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value.startsWith("Oct 31, 2009")).isTrue();
-		assertThat(value.endsWith("12:00:00 PM")).isTrue();
+		assertThat(value)
+				.startsWith("Oct 31, 2009")
+				.endsWith("12:00:00 PM");
 	}
 
 	@Test
@@ -299,7 +335,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternLocalDateTime", "10/31/09 12:00 PM");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("patternLocalDateTime")).isEqualTo("10/31/09 12:00 PM");
 	}
 
@@ -316,8 +352,38 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDate", "2009-10-31");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("isoLocalDate")).isEqualTo("2009-10-31");
+	}
+
+	@Test
+	void isoLocalDateWithInvalidFormat() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		String propertyName = "isoLocalDate";
+		propertyValues.add(propertyName, "2009-31-10");
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+		FieldError fieldError = bindingResult.getFieldError(propertyName);
+		assertThat(fieldError.unwrap(TypeMismatchException.class))
+			.hasMessageContaining("for property 'isoLocalDate'")
+			.hasCauseInstanceOf(ConversionFailedException.class).cause()
+				.hasMessageContaining("for value [2009-31-10]")
+				.hasCauseInstanceOf(IllegalArgumentException.class).cause()
+					.hasMessageContaining("Parse attempt failed for value [2009-31-10]")
+					.hasCauseInstanceOf(DateTimeParseException.class).cause()
+						// Unable to parse date time value "2009-31-10" using configuration from
+						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=SS, iso=DATE, fallbackPatterns=[])
+						// We do not check "fallbackPatterns=[]", since the array representation in the toString()
+						// implementation for annotations changed from [] to {} in Java 9.
+						.hasMessageContainingAll(
+							"Unable to parse date time value \"2009-31-10\" using configuration from",
+							"@org.springframework.format.annotation.DateTimeFormat", "iso=DATE")
+						.hasCauseInstanceOf(DateTimeParseException.class).cause()
+							.hasMessageStartingWith("Text '2009-31-10'")
+							.hasCauseInstanceOf(DateTimeException.class).cause()
+								.hasMessageContaining("Invalid value for MonthOfYear (valid values 1 - 12): 31")
+								.hasNoCause();
 	}
 
 	@Test
@@ -325,7 +391,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalTime", "12:00:00");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("isoLocalTime")).isEqualTo("12:00:00");
 	}
 
@@ -334,7 +400,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("isoLocalTime")).isEqualTo("12:00:00");
 	}
 
@@ -343,7 +409,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDateTime", "2009-10-31T12:00:00");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("isoLocalDateTime")).isEqualTo("2009-10-31T12:00:00");
 	}
 
@@ -352,7 +418,7 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDateTime", "2009-10-31T12:00:00.000Z");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("isoLocalDateTime")).isEqualTo("2009-10-31T12:00:00");
 	}
 
@@ -361,8 +427,17 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("instant", "2009-10-31T12:00:00.000Z");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31T12:00")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("instant").toString()).startsWith("2009-10-31T12:00");
+	}
+
+	@Test
+	void testBindInstantAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("styleInstant", "2017-02-21T13:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("styleInstant")).isEqualTo("2017-02-21T13:00");
 	}
 
 	@Test
@@ -374,8 +449,8 @@ class DateTimeFormattingTests {
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add("instant", new Date(109, 9, 31, 12, 0));
 			binder.bind(propertyValues);
-			assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-			assertThat(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31")).isTrue();
+			assertThat(binder.getBindingResult().getErrorCount()).isZero();
+			assertThat(binder.getBindingResult().getFieldValue("instant").toString()).startsWith("2009-10-31");
 		}
 		finally {
 			TimeZone.setDefault(defaultZone);
@@ -387,8 +462,8 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("period", "P6Y3M1D");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("period").toString().equals("P6Y3M1D")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("period").toString()).isEqualTo("P6Y3M1D");
 	}
 
 	@Test
@@ -396,8 +471,8 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("duration", "PT8H6M12.345S");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("duration").toString().equals("PT8H6M12.345S")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("duration").toString()).isEqualTo("PT8H6M12.345S");
 	}
 
 	@Test
@@ -405,8 +480,8 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("year", "2007");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("year").toString().equals("2007")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("year").toString()).isEqualTo("2007");
 	}
 
 	@Test
@@ -414,8 +489,8 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("month", "JULY");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("month").toString().equals("JULY")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("month").toString()).isEqualTo("JULY");
 	}
 
 	@Test
@@ -423,8 +498,8 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("month", "July");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("month").toString().equals("JULY")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("month").toString()).isEqualTo("JULY");
 	}
 
 	@Test
@@ -432,8 +507,18 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("yearMonth", "2007-12");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("yearMonth").toString().equals("2007-12")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("yearMonth").toString()).isEqualTo("2007-12");
+	}
+
+	@Test
+	public void testBindYearMonthAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("yearMonthAnnotatedPattern", "12/2007");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("yearMonthAnnotatedPattern")).isEqualTo("12/2007");
+		assertThat(binder.getBindingResult().getRawFieldValue("yearMonthAnnotatedPattern")).isEqualTo(YearMonth.parse("2007-12"));
 	}
 
 	@Test
@@ -441,8 +526,18 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("monthDay", "--12-03");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03")).isTrue();
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("monthDay").toString()).isEqualTo("--12-03");
+	}
+
+	@Test
+	public void testBindMonthDayAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDayAnnotatedPattern", "1/3");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getFieldValue("monthDayAnnotatedPattern")).isEqualTo("1/3");
+		assertThat(binder.getBindingResult().getRawFieldValue("monthDayAnnotatedPattern")).isEqualTo(MonthDay.parse("--01-03"));
 	}
 
 	@Nested
@@ -456,7 +551,7 @@ class DateTimeFormattingTests {
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
 			BindingResult bindingResult = binder.getBindingResult();
-			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getErrorCount()).isZero();
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("3/2/21");
 		}
 
@@ -468,11 +563,12 @@ class DateTimeFormattingTests {
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
 			BindingResult bindingResult = binder.getBindingResult();
-			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getErrorCount()).isZero();
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02");
 		}
 
 		@ParameterizedTest(name = "input date: {0}")
+		// @ValueSource(strings = {"12:00:00\u202FPM", "12:00:00", "12:00"})
 		@ValueSource(strings = {"12:00:00 PM", "12:00:00", "12:00"})
 		void styleLocalTime(String propertyValue) {
 			String propertyName = "styleLocalTimeWithFallbackPatterns";
@@ -480,7 +576,8 @@ class DateTimeFormattingTests {
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
 			BindingResult bindingResult = binder.getBindingResult();
-			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getErrorCount()).isZero();
+			// assertThat(bindingResult.getFieldValue(propertyName)).asString().matches("12:00:00\\SPM");
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("12:00:00 PM");
 		}
 
@@ -492,7 +589,7 @@ class DateTimeFormattingTests {
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
 			BindingResult bindingResult = binder.getBindingResult();
-			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getErrorCount()).isZero();
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02T12:00:00");
 		}
 
@@ -508,20 +605,36 @@ class DateTimeFormattingTests {
 			FieldError fieldError = bindingResult.getFieldError(propertyName);
 			assertThat(fieldError.unwrap(TypeMismatchException.class))
 				.hasMessageContaining("for property 'patternLocalDateWithFallbackPatterns'")
-				.hasCauseInstanceOf(ConversionFailedException.class).getCause()
-					.hasMessageContaining("for value '210302'")
-					.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+				.hasCauseInstanceOf(ConversionFailedException.class).cause()
+					.hasMessageContaining("for value [210302]")
+					.hasCauseInstanceOf(IllegalArgumentException.class).cause()
 						.hasMessageContaining("Parse attempt failed for value [210302]")
-						.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+						.hasCauseInstanceOf(DateTimeParseException.class).cause()
 							// Unable to parse date time value "210302" using configuration from
 							// @org.springframework.format.annotation.DateTimeFormat(
 							// pattern=yyyy-MM-dd, style=SS, iso=NONE, fallbackPatterns=[M/d/yy, yyyyMMdd, yyyy.MM.dd])
 							.hasMessageContainingAll(
 								"Unable to parse date time value \"210302\" using configuration from",
 								"@org.springframework.format.annotation.DateTimeFormat",
-								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd");
+								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd")
+							.hasCauseInstanceOf(DateTimeParseException.class).cause()
+								.hasMessageStartingWith("Text '210302'")
+								.hasNoCause();
 		}
-}
+
+		@Test
+		void testBindInstantAsLongEpochMillis() {
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add("instant", 1234L);
+			binder.bind(propertyValues);
+			assertThat(binder.getBindingResult().getErrorCount()).isZero();
+			assertThat(binder.getBindingResult().getRawFieldValue("instant"))
+					.isInstanceOf(Instant.class)
+					.isEqualTo(Instant.ofEpochMilli(1234L));
+			assertThat(binder.getBindingResult().getFieldValue("instant"))
+					.hasToString("1970-01-01T00:00:01.234Z");
+		}
+	}
 
 
 	public static class DateTimeBean {
@@ -567,6 +680,9 @@ class DateTimeFormattingTests {
 
 		private Instant instant;
 
+		@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+		private Instant styleInstant;
+
 		private Period period;
 
 		private Duration duration;
@@ -577,7 +693,13 @@ class DateTimeFormattingTests {
 
 		private YearMonth yearMonth;
 
+		@DateTimeFormat(pattern="MM/uuuu")
+		private YearMonth yearMonthAnnotatedPattern;
+
 		private MonthDay monthDay;
+
+		@DateTimeFormat(pattern="M/d")
+		private MonthDay monthDayAnnotatedPattern;
 
 		private final List<DateTimeBean> children = new ArrayList<>();
 
@@ -701,6 +823,14 @@ class DateTimeFormattingTests {
 			this.instant = instant;
 		}
 
+		public Instant getStyleInstant() {
+			return this.styleInstant;
+		}
+
+		public void setStyleInstant(Instant styleInstant) {
+			this.styleInstant = styleInstant;
+		}
+
 		public Period getPeriod() {
 			return this.period;
 		}
@@ -741,12 +871,28 @@ class DateTimeFormattingTests {
 			this.yearMonth = yearMonth;
 		}
 
+		public YearMonth getYearMonthAnnotatedPattern() {
+			return yearMonthAnnotatedPattern;
+		}
+
+		public void setYearMonthAnnotatedPattern(YearMonth yearMonthAnnotatedPattern) {
+			this.yearMonthAnnotatedPattern = yearMonthAnnotatedPattern;
+		}
+
 		public MonthDay getMonthDay() {
 			return this.monthDay;
 		}
 
 		public void setMonthDay(MonthDay monthDay) {
 			this.monthDay = monthDay;
+		}
+
+		public MonthDay getMonthDayAnnotatedPattern() {
+			return monthDayAnnotatedPattern;
+		}
+
+		public void setMonthDayAnnotatedPattern(MonthDay monthDayAnnotatedPattern) {
+			this.monthDayAnnotatedPattern = monthDayAnnotatedPattern;
 		}
 
 		public List<DateTimeBean> getChildren() {
